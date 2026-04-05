@@ -118,28 +118,31 @@ document.addEventListener("keydown",e=>{
   if(e.key=="ArrowDown") move("down");
 });
 
-// 🔥 MOBILE SWIPE (WORKING)
-let startX=0,startY=0;
+// 🔥 PERFECT MOBILE SWIPE FIX
 
-document.addEventListener("touchstart",e=>{
-  startX=e.touches[0].clientX;
-  startY=e.touches[0].clientY;
-});
+let startX = 0;
+let startY = 0;
 
-document.addEventListener("touchend",e=>{
-  let dx=e.changedTouches[0].clientX-startX;
-  let dy=e.changedTouches[0].clientY-startY;
+const gameArea = document.getElementById("grid");
 
-  if(Math.abs(dx)>Math.abs(dy)){
-    if(dx>30) move("right");
-    else if(dx<-30) move("left");
-  }else{
-    if(dy>30) move("down");
-    else if(dy<-30) move("up");
+gameArea.addEventListener("touchstart", function(e) {
+  startX = e.touches[0].clientX;
+  startY = e.touches[0].clientY;
+}, { passive: false });
+
+gameArea.addEventListener("touchend", function(e) {
+  let endX = e.changedTouches[0].clientX;
+  let endY = e.changedTouches[0].clientY;
+
+  let dx = endX - startX;
+  let dy = endY - startY;
+
+  // minimum swipe distance
+  if (Math.abs(dx) > Math.abs(dy)) {
+    if (dx > 30) move("right");
+    else if (dx < -30) move("left");
+  } else {
+    if (dy > 30) move("down");
+    else if (dy < -30) move("up");
   }
-});
-
-function restartGame(){
-  document.getElementById("gameOver").classList.add("hidden");
-  init();
-}
+}, { passive: false });
