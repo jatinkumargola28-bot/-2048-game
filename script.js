@@ -146,3 +146,16 @@ gameArea.addEventListener("touchend", function(e) {
     else if (dy < -30) move("up");
   }
 }, { passive: false });
+
+// 🔥 RESTART GAME FIX
+function restartGame() {
+  document.getElementById("gameOver").classList.add("hidden");
+  
+  grid = Array(4).fill().map(() => Array(4).fill(0));
+  score = 0;
+
+  addTile();
+  addTile();
+
+  update();
+}
