@@ -4,6 +4,7 @@ let best = localStorage.getItem("bestScore") || 0;
 
 document.getElementById("best").textContent = best;
 
+// ================= INIT =================
 window.onload = () => {
   init();
 };
@@ -16,111 +17,149 @@ function init() {
   update();
 }
 
+// ================= ADD TILE =================
 function addTile() {
   let empty = [];
-  for (let i=0;i<4;i++)
-    for (let j=0;j<4;j++)
-      if (grid[i][j]==0) empty.push({i,j});
+  for (let i = 0; i < 4; i++)
+    for (let j = 0; j < 4; j++)
+      if (grid[i][j] == 0) empty.push({ i, j });
 
   if (!empty.length) return;
 
-  let {i,j} = empty[Math.floor(Math.random()*empty.length)];
-  grid[i][j] = Math.random()>0.5?2:4;
+  let { i, j } = empty[Math.floor(Math.random() * empty.length)];
+  grid[i][j] = Math.random() > 0.5 ? 2 : 4;
 }
 
+// ================= UPDATE =================
 function update() {
   let g = document.getElementById("grid");
-  g.innerHTML="";
+  g.innerHTML = "";
 
-  grid.forEach(r=>{
-    r.forEach(v=>{
-      let d=document.createElement("div");
-      d.className="tile";
-      if(v){
-        d.textContent=v;
-        d.setAttribute("data-value",v);
+  grid.forEach(r => {
+    r.forEach(v => {
+      let d = document.createElement("div");
+      d.className = "tile";
+
+      if (v) {
+        d.textContent = v;
+        d.setAttribute("data-value", v);
       }
+
       g.appendChild(d);
     });
   });
 
-  document.getElementById("score").textContent=score;
+  document.getElementById("score").textContent = score;
 
-  if(score>best){
-    best=score;
-    localStorage.setItem("bestScore",best);
-    document.getElementById("best").textContent=best;
+  if (score > best) {
+    best = score;
+    localStorage.setItem("bestScore", best);
+    document.getElementById("best").textContent = best;
   }
 }
 
-function slide(row){
-  row=row.filter(v=>v);
-  for(let i=0;i<row.length-1;i++){
-    if(row[i]==row[i+1]){
-      row[i]*=2;
-      score+=row[i];
-      row[i+1]=0;
+// ================= SLIDE =================
+function slide(row) {
+  row = row.filter(v => v);
+
+  for (let i = 0; i < row.length - 1; i++) {
+    if (row[i] == row[i + 1]) {
+      row[i] *= 2;
+      score += row[i];
+      row[i + 1] = 0;
     }
   }
-  row=row.filter(v=>v);
-  while(row.length<4) row.push(0);
+
+  row = row.filter(v => v);
+  while (row.length < 4) row.push(0);
+
   return row;
 }
 
-function rotate(){
-  let n=Array(4).fill().map(()=>Array(4).fill(0));
-  for(let i=0;i<4;i++)
-    for(let j=0;j<4;j++)
-      n[j][3-i]=grid[i][j];
-  grid=n;
+// ================= ROTATE =================
+function rotate() {
+  let n = Array(4).fill().map(() => Array(4).fill(0));
+  for (let i = 0; i < 4; i++)
+    for (let j = 0; j < 4; j++)
+      n[j][3 - i] = grid[i][j];
+  grid = n;
 }
 
-function move(dir){
-  let old=JSON.stringify(grid);
+// ================= MOVE =================
+function move(dir) {
+  let old = JSON.stringify(grid);
 
-  if(dir=="up") rotate(),rotate(),rotate();
-  if(dir=="right") rotate(),rotate();
-  if(dir=="down") rotate();
+  if (dir == "up") rotate(), rotate(), rotate();
+  if (dir == "right") rotate(), rotate();
+  if (dir == "down") rotate();
 
-  for(let i=0;i<4;i++) grid[i]=slide(grid[i]);
+  for (let i = 0; i < 4; i++) grid[i] = slide(grid[i]);
 
-  if(dir=="up") rotate();
-  if(dir=="right") rotate(),rotate();
-  if(dir=="down") rotate(),rotate(),rotate();
+  if (dir == "up") rotate();
+  if (dir == "right") rotate(), rotate();
+  if (dir == "down") rotate(), rotate(), rotate();
 
-  if(JSON.stringify(grid)!=old){
+  if (JSON.stringify(grid) != old) {
     addTile();
     update();
   }
 
-  if(gameOver()){
+  if (gameOver()) {
     document.getElementById("gameOver").classList.remove("hidden");
   }
 }
 
-function gameOver(){
-  for(let i=0;i<4;i++){
-    for(let j=0;j<4;j++){
-      if(grid[i][j]==0) return false;
-      if(j<3 && grid[i][j]==grid[i][j+1]) return false;
-      if(i<3 && grid[i][j]==grid[i+1][j]) return false;
+// ================= GAME OVER =================
+function gameOver() {
+  for (let i = 0; i < 4; i++) {
+    for (let j = 0; j < 4; j++) {
+      if (grid[i][j] == 0) return false;
+      if (j < 3 && grid[i][j] == grid[i][j + 1]) return false;
+      if (i < 3 && grid[i][j] == grid[i + 1][j]) return false;
     }
   }
   return true;
 }
 
-document.addEventListener("keydown",e=>{
-  if(["ArrowUp","ArrowDown","ArrowLeft","ArrowRight"].includes(e.key)){
-    e.preventDefault();  // 🔥 scroll band
+// ================= KEYBOARD =================
+document.addEventListener("keydown", e => {
+  if (["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight"].includes(e.key)) {
+    e.preventDefault(); // stop scroll
   }
 
-  if(e.key=="ArrowLeft") move("left");
-  if(e.key=="ArrowRight") move("right");
-  if(e.key=="ArrowUp") move("up");
-  if(e.key=="ArrowDown") move("down");
+  if (e.key == "ArrowLeft") move("left");
+  if (e.key == "ArrowRight") move("right");
+  if (e.key == "ArrowUp") move("up");
+  if (e.key == "ArrowDown") move("down");
 });
 
-function restartGame(){
+// ================= MOBILE SWIPE =================
+let startX = 0;
+let startY = 0;
+
+document.addEventListener("touchstart", e => {
+  startX = e.touches[0].clientX;
+  startY = e.touches[0].clientY;
+});
+
+document.addEventListener("touchend", e => {
+  let endX = e.changedTouches[0].clientX;
+  let endY = e.changedTouches[0].clientY;
+
+  let dx = endX - startX;
+  let dy = endY - startY;
+
+  if (Math.abs(dx) > Math.abs(dy)) {
+    if (dx > 50) move("right");
+    else if (dx < -50) move("left");
+  } else {
+    if (dy > 50) move("down");
+    else if (dy < -50) move("up");
+  }
+});
+
+// ================= RESTART =================
+function restartGame() {
   document.getElementById("gameOver").classList.add("hidden");
   init();
 }
